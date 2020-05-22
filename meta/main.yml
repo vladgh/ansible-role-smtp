@@ -1,0 +1,24 @@
+---
+galaxy_info:
+  role_name: smtp
+  author: Vlad Ghinea
+  description: Vlad's SMTP Role
+  company: VladGh.com
+  license: Apache v2
+  min_ansible_version: 2.4
+  galaxy_tags: []
+  platforms:
+    - name: Ubuntu
+      versions:
+        - bionic
+        - focal
+    - name: Debian
+      versions:
+        - stretch
+        - buster
+    - name: EL
+      versions:
+        - 7
+        - 8
+
+dependencies: []

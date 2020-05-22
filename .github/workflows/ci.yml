@@ -1,0 +1,43 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    env:
+      ANSIBLE_FORCE_COLOR: '1'
+    strategy:
+      matrix:
+        os:
+          - ubuntu:18.04
+          - ubuntu:20.04
+          - debian:9
+          - debian:10
+          - centos:7
+          - centos:8
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        path: vladgh.smtp
+    - name: Set up Python
+      uses: actions/setup-python@v2
+    - name: Install dependencies
+      run: pip install molecule docker ansible-lint yamllint
+    - name: Test
+      run: cd vladgh.smtp && molecule test
+      env:
+        MOLECULE_DISTRO: "${{ matrix.os }}"
+  deploy:
+    name: Deploy
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+    - name: Set up Python
+      uses: actions/setup-python@v2
+    - name: Install dependencies
+      run: pip install ansible
+    - name: Deploy
+      run: ansible-galaxy role import --api-key ${{ secrets.ANSIBLE_GALAXY_API_KEY }} vladgh ansible-role-smtp

@@ -1,0 +1,13 @@
+# {{ ansible_managed }}
+
+{% if smtp_server_address is defined and smtp_server_address and smtp_server_port is defined and smtp_server_port %}
+set smtp://{{ smtp_server_address }}:{{ smtp_server_port }}
+{% endif %}
+set smtp-use-starttls
+set smtp-auth=login
+{% if smtp_user is defined and smtp_user %}
+set smtp-auth-user={{ smtp_user }}
+{% endif %}
+{% if smtp_password is defined and smtp_password %}
+set smtp-auth-password={{ smtp_password }}
+{% endif %}
