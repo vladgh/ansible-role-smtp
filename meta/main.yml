@@ -4,7 +4,7 @@ galaxy_info:
   description: Vlad's SMTP Role
   author: Vlad Ghinea
   license: Apache v2
-  min_ansible_version: 2.4
+  min_ansible_version: 2.9
   galaxy_tags: []
   platforms:
     - name: Ubuntu
@@ -15,9 +15,5 @@ galaxy_info:
       versions:
         - stretch
         - buster
-    - name: EL
-      versions:
-        - 7
-        - 8
 
 dependencies: []

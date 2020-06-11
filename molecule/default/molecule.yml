@@ -6,6 +6,9 @@ driver:
 platforms:
   - name: instance
     image: "${MOLECULE_DISTRO:-ubuntu:latest}"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
 provisioner:
   name: ansible
 lint: |

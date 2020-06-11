@@ -1,6 +1,16 @@
 ---
-- import_tasks: debian.yml
-  when: ansible_os_family == "Debian"
+- name: Install S-Nail
+  apt:
+    name: s-nail
+    state: present
 
-- import_tasks: redhat.yml
-  when: ansible_os_family == "RedHat"
+- name: Configure S-Nail
+  template:
+    src: mailrc.s-nail.j2
+    dest: /root/.mailrc
+
+- name: Setup alternatives for MTA
+  alternatives:
+    name: mta
+    link: /usr/sbin/sendmail
+    path: /usr/bin/s-nail
