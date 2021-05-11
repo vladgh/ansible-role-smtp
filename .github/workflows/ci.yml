@@ -1,41 +1,58 @@
 name: CI
 
-on: [push, pull_request]
+on: push
 
 jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    env:
-      ANSIBLE_FORCE_COLOR: '1'
     strategy:
       matrix:
         os:
-          - ubuntu:18.04
-          - ubuntu:20.04
-          - debian:9
-          - debian:10
+          - ubuntu2004
+          - ubuntu1804
+          - debian10
+          - debian9
     steps:
-    - uses: actions/checkout@v2
-      with:
-        path: vladgh.smtp
-    - name: Set up Python
-      uses: actions/setup-python@v2
-    - name: Install dependencies
-      run: pip install molecule docker ansible-lint yamllint
-    - name: Test
-      run: cd vladgh.smtp && molecule test
-      env:
-        MOLECULE_DISTRO: "${{ matrix.os }}"
+      - name: Set VARs
+        run: |
+          echo "OWNER=${{ github.repository_owner }}" >> $GITHUB_ENV
+          echo "REPO=${{ github.event.repository.name }}" >> $GITHUB_ENV
+      - name: Set VARs
+        run: |
+          echo "ROLE=${REPO##*-}" >> $GITHUB_ENV
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: ${{ env.OWNER }}.${{ env.ROLE }}
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - name: Install dependencies
+        run: python3 -m pip install docker ansible ansible-lint yamllint molecule molecule-docker
+      - name: Test role
+        run: molecule test
+        env:
+          PY_COLORS: 1
+          ANSIBLE_FORCE_COLOR: 1
+          MOLECULE_DISTRO: ${{ matrix.os }}
+        working-directory: ${{ env.OWNER }}.${{ env.ROLE }}
   deploy:
     name: Deploy
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     steps:
-    - name: Set up Python
-      uses: actions/setup-python@v2
-    - name: Install dependencies
-      run: pip install ansible
-    - name: Deploy
-      run: ansible-galaxy role import --api-key ${{ secrets.ANSIBLE_GALAXY_API_KEY }} vladgh ansible-role-smtp
+      - name: Set VARs
+        run: |
+          echo "OWNER=${{ github.repository_owner }}" >> $GITHUB_ENV
+          echo "REPO=${{ github.event.repository.name }}" >> $GITHUB_ENV
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - name: Install dependencies
+        run: python3 -m pip install ansible-base
+      - name: Deploy
+        run: ansible-galaxy role import --api-key ${{ secrets.ANSIBLE_GALAXY_API_KEY }} ${{ env.OWNER }} ${{ env.REPO }}
